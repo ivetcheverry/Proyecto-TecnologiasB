@@ -13,8 +13,31 @@ require_once("./repositories/studentsSubjects.php");
 
 function handleGet($conn) 
 {
-    $studentsSubjects = getAllSubjectsStudents($conn);
-    echo json_encode($studentsSubjects);
+    if (isset($_GET['id'])) 
+    {
+        $studentsSubjects = getSubjectsStudentsById($conn, $_GET['id']);
+        echo json_encode($studentsSubjects);
+    } 
+    //2.0
+    else if (isset($_GET['page']) && isset($_GET['limit'])) 
+    {
+        $page = (int)$_GET['page'];
+        $limit = (int)$_GET['limit'];
+        $offset = ($page - 1) * $limit;
+
+        $studentsSubjects = getPaginatedStudentsSubjects($conn, $limit, $offset);
+        $total = getTotalStudentsSubjects($conn);
+
+        echo json_encode([
+            'data' => $studentsSubjects, // ya es array
+            'total' => $total        // ya es entero
+        ]);
+    }
+    else
+    {
+        $studentsSubjects = getAllSubjectsStudents($conn); // ya es array
+        echo json_encode($studentsSubjects);
+    }
 }
 
 function handlePost($conn) 
@@ -25,7 +48,7 @@ function handlePost($conn)
     if ($result['inserted'] > 0) 
     {
         echo json_encode(["message" => "Asignación realizada"]);
-    } 
+    }
     else 
     {
         http_response_code(500);

@@ -12,12 +12,18 @@ import { studentsAPI } from '../apiConsumers/studentsAPI.js';
 import { subjectsAPI } from '../apiConsumers/subjectsAPI.js';
 import { studentsSubjectsAPI } from '../apiConsumers/studentsSubjectsAPI.js';
 
+//For pagination:
+let currentPage = 1;
+let totalPages = 1;
+const limit = 5;
+
 document.addEventListener('DOMContentLoaded', () => 
 {
     initSelects();
     setupFormHandler();
     setupCancelHandler();
     loadRelations();
+    setupPaginationControls();
 });
 
 async function initSelects() 
@@ -90,6 +96,33 @@ function setupCancelHandler()
     });
 }
 
+function setupPaginationControls() 
+{
+    document.getElementById('prevPage').addEventListener('click', () => 
+    {
+        if (currentPage > 1) 
+        {
+            currentPage--;
+            loadStudentsSubjects();
+        }
+    });
+
+    document.getElementById('nextPage').addEventListener('click', () => 
+    {
+        if (currentPage < totalPages) 
+        {
+            currentPage++;
+            loadStudentsSubjects();
+        }
+    });
+
+    document.getElementById('resultsPerPage').addEventListener('change', e => 
+    {
+        currentPage = 1;
+        loadStudentsSubjects();
+    });
+}
+  
 function getFormData() 
 {
     return{
@@ -106,37 +139,30 @@ function clearForm()
     document.getElementById('relationId').value = '';
 }
 
-async function loadRelations() 
-{
-    try 
-    {
-        const relations = await studentsSubjectsAPI.fetchAll();
-        
-        /**
-         * DEBUG
-         */
-        //console.log(relations);
+async function loadRelations() {
+    try {
+        const resPerPage = parseInt(document.getElementById('resultsPerPage').value, 10) || limit;
+        const data = await studentsSubjectsAPI.fetchPaginated(currentPage, resPerPage);
+        console.log(data);
 
-        /**
-         * En JavaScript: Cualquier string que no esté vacío ("") es considerado truthy.
-         * Entonces "0" (que es el valor que llega desde el backend) es truthy,
-         * ¡aunque conceptualmente sea falso! por eso: 
-         * Se necesita convertir ese string "0" a un número real 
-         * o asegurarte de comparar el valor exactamente. 
-         * Con el siguiente código se convierten todos los string approved a enteros.
-         */
-        relations.forEach(rel => 
-        {
+        // Ajustá el nombre de la propiedad según lo que devuelva tu backend
+        // Si tu backend devuelve { data: [...], total: N }, usá data.data
+        // Si devuelve { studentsSubjects: [...], total: N }, usá data.studentsSubjects
+        const relations = data.data || data.studentsSubjects || [];
+
+        // Convertir approved a número (como ya hacías)
+        relations.forEach(rel => {
             rel.approved = Number(rel.approved);
         });
-        
+
         renderRelationsTable(relations);
-    } 
-    catch (err) 
-    {
+        totalPages = Math.ceil(data.total / resPerPage);
+        document.getElementById('pageInfo').textContent = `Página ${currentPage} de ${totalPages}`;
+    } catch (err) {
         console.error('Error cargando inscripciones:', err.message);
     }
 }
+
 
 function renderRelationsTable(relations) 
 {

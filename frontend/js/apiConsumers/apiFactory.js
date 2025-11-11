@@ -21,7 +21,12 @@ export function createAPI(moduleName, config = {})
             body: JSON.stringify(data)
         });
 
-        if (!res.ok) throw new Error(`Error en ${method}`);
+        if (!res.ok) {
+            const error = new Error(`Error ${res.status} en ${method}`);
+            error.status = res.status; // nuevo-para que pase el mensaje 409
+            throw error;
+        }
+
         return await res.json();
     }
 

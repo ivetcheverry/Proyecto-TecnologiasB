@@ -9,11 +9,36 @@
 *    Iteration   : 1.0 ( prototype )
 */
 
+
+/**
+ * Verifica si una materia tiene asignaciones de alumnos que la hayan APROBADO.
+ * La comprobación se hace en la tabla students_subjects donde approved = 1.
+ * * @param mysqli $conn La conexión a la base de datos.
+ * @param int $id El ID de la materia.
+ * @return bool Retorna true si tiene aprobaciones, false si no.
+ */
+
 function getAllSubjects($conn) 
 {
     $sql = "SELECT * FROM subjects";
 
     return $conn->query($sql)->fetch_all(MYSQLI_ASSOC);
+}
+
+function getPaginatedSubjects($conn, $limit, $offset) 
+{
+    $stmt = $conn->prepare("SELECT * FROM subjects LIMIT ? OFFSET ?");
+    $stmt->bind_param("ii", $limit, $offset);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    return $result->fetch_all(MYSQLI_ASSOC);
+}
+
+function getTotalSubjects($conn) 
+{
+    $sql = "SELECT COUNT(*) AS total FROM subjects";
+    $result = $conn->query($sql);
+    return $result->fetch_assoc()['total'];
 }
 
 function getSubjectById($conn, $id) 
@@ -50,6 +75,7 @@ function updateSubject($conn, $id, $name)
 
     return ['updated' => $stmt->affected_rows];
 }
+
 
 function deleteSubject($conn, $id) 
 {

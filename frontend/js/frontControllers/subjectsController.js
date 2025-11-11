@@ -10,11 +10,17 @@
 
 import { subjectsAPI } from '../apiConsumers/subjectsAPI.js';
 
+//For pagination:
+let currentPage = 1;
+let totalPages = 1;
+const limit = 5;
+
 document.addEventListener('DOMContentLoaded', () => 
 {
     loadSubjects();
     setupSubjectFormHandler();
     setupCancelHandler();
+    setupPaginationControls();
 });
 
 function setupSubjectFormHandler() 
@@ -60,14 +66,46 @@ function setupCancelHandler()
     });
 }
 
+function setupPaginationControls() 
+{
+    document.getElementById('prevPage').addEventListener('click', () => 
+    {
+        if (currentPage > 1) 
+        {
+            currentPage--;
+            loadSubjects();
+        }
+    });
+
+    document.getElementById('nextPage').addEventListener('click', () => 
+    {
+        if (currentPage < totalPages) 
+        {
+            currentPage++;
+            loadSubjects();
+        }
+    });
+
+    document.getElementById('resultsPerPage').addEventListener('change', e => 
+    {
+        currentPage = 1;
+        loadSubjects();
+    });
+}
+
+
 async function loadSubjects()
 {
-    try
+    try 
     {
-        const subjects = await subjectsAPI.fetchAll();
-        renderSubjectTable(subjects);
-    }
-    catch (err)
+        const resPerPage = parseInt(document.getElementById('resultsPerPage').value, 10) || limit;
+        const data = await subjectsAPI.fetchPaginated(currentPage, resPerPage);
+        console.log(data);
+        renderSubjectTable(data.subjects);
+        totalPages = Math.ceil(data.total / resPerPage);
+        document.getElementById('pageInfo').textContent = `Página ${currentPage} de ${totalPages}`;
+    } 
+    catch (err) 
     {
         console.error('Error cargando materias:', err.message);
     }
@@ -96,6 +134,7 @@ function createCell(text)
     return td;
 }
 
+
 function createSubjectActionsCell(subject)
 {
     const td = document.createElement('td');
@@ -119,17 +158,18 @@ function createSubjectActionsCell(subject)
     return td;
 }
 
-async function confirmDeleteSubject(id)
-{
+async function confirmDeleteSubject(id) {
     if (!confirm('¿Seguro que deseas borrar esta materia?')) return;
 
-    try
-    {
+    try {
         await subjectsAPI.remove(id);
-        loadSubjects();
-    }
-    catch (err)
-    {
-        console.error('Error al borrar materia:', err.message);
+        loadSubjects(); // recarga la tabla
+    } catch (err) {
+        // Mostrar mensaje personalizado si es error 409, sino genérico
+        if (err.status==409) {
+            alert("No se puede eliminar la materia porque está asignada a uno o más estudiantes.");
+        } else {
+            alert("No se pudo eliminar la materia.");
+        }
     }
 }
