@@ -35,6 +35,15 @@ function getTotalStudents($conn)
     return $result->fetch_assoc()['total'];
 }
 
+function isStudentAssigned($conn, $id) 
+{
+    $stmt = $conn->prepare("SELECT COUNT(*) AS count FROM students_subjects WHERE student_id = ?");
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    return $result->fetch_assoc()['count'] > 0;
+}
+
 function getStudentById($conn, $id) 
 {
     $stmt = $conn->prepare("SELECT * FROM students WHERE id = ?");
@@ -75,6 +84,7 @@ function updateStudent($conn, $id, $fullname, $email, $age)
 
 function deleteStudent($conn, $id) 
 {
+    // Lógica para el borrado
     $sql = "DELETE FROM students WHERE id = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $id);
