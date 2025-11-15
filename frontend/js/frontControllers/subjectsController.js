@@ -165,11 +165,7 @@ async function confirmDeleteSubject(id) {
         await subjectsAPI.remove(id);
         loadSubjects(); // recarga la tabla
     } catch (err) {
-        // Mostrar mensaje personalizado si es error 409, sino genérico
-        if (err.status==409) {
-            alert("No se puede eliminar la materia porque está asignada a uno o más estudiantes.");
-        } else {
-            alert("No se pudo eliminar la materia.");
-        }
+        document.getElementById('errorModal').style.display = 'block';
+       
     }
 }

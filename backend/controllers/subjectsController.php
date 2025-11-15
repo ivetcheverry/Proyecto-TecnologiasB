@@ -85,7 +85,7 @@ function handleDelete($conn) //nuevo
 
     $subjectId = (int)$input['id'];
 
-    // 🔍 Verificamos si la materia está asignada
+    // Verifico si la materia está asignada
     $checkSql = "SELECT COUNT(*) AS count FROM students_subjects WHERE subject_id = ?";
     $checkStmt = $conn->prepare($checkSql);
     $checkStmt->bind_param("i", $subjectId);
@@ -93,7 +93,7 @@ function handleDelete($conn) //nuevo
     $count = $checkStmt->get_result()->fetch_assoc()['count'];
 
     if ($count > 0) {
-        // ❌ No se puede borrar: hay asignaciones
+        // No se puede borrar: hay asignaciones
         http_response_code(409); // Código de "conflicto"
         echo json_encode([
             "error" => "No se puede eliminar la materia porque está asignada a uno o más estudiantes."
@@ -101,7 +101,7 @@ function handleDelete($conn) //nuevo
         return;
     }
 
-    // ✅ Si no hay asignaciones, borramos
+    //Si no hay asignaciones, borramos
     $result = deleteSubject($conn, $subjectId);
     if ($result['deleted'] > 0) {
         echo json_encode(["message" => "Materia eliminada correctamente"]);
