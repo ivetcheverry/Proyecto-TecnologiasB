@@ -11,6 +11,7 @@
 
 require_once("./repositories/subjects.php");
 
+
 function handleGet($conn) 
 {
     if (isset($_GET['id'])) 
@@ -72,19 +73,40 @@ function handlePut($conn)
     }
 }
 
-function handleDelete($conn) 
+function handleDelete($conn) //nuevo
 {
     $input = json_decode(file_get_contents("php://input"), true);
     
-    $result = deleteSubject($conn, $input['id']);
-    if ($result['deleted'] > 0) 
-    {
+    if (!isset($input['id'])) {
+        http_response_code(400);
+        echo json_encode(["error" => "ID de materia no proporcionado"]);
+        return;
+    }
+
+    $subjectId = (int)$input['id'];
+
+    // Verifico si la materia está asignada
+    $checkSql = "SELECT COUNT(*) AS count FROM students_subjects WHERE subject_id = ?";
+    $checkStmt = $conn->prepare($checkSql);
+    $checkStmt->bind_param("i", $subjectId);
+    $checkStmt->execute();
+    $count = $checkStmt->get_result()->fetch_assoc()['count'];
+
+    if ($count > 0) {
+        // No se puede borrar: hay asignaciones
+        http_response_code(409); // Código de "conflicto"
+        echo json_encode([
+            "error" => "No se puede eliminar la materia porque está asignada a uno o más estudiantes."
+        ]);
+        return;
+    }
+
+    //Si no hay asignaciones, borramos
+    $result = deleteSubject($conn, $subjectId);
+    if ($result['deleted'] > 0) {
         echo json_encode(["message" => "Materia eliminada correctamente"]);
-    } 
-    else 
-    {
+    } else {
         http_response_code(500);
-        echo json_encode(["error" => "No se pudo eliminar"]);
+        echo json_encode(["error" => "No se pudo eliminar la materia"]);
     }
 }
-?>

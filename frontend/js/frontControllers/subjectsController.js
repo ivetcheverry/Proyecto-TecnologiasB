@@ -134,6 +134,7 @@ function createCell(text)
     return td;
 }
 
+
 function createSubjectActionsCell(subject)
 {
     const td = document.createElement('td');
@@ -157,17 +158,14 @@ function createSubjectActionsCell(subject)
     return td;
 }
 
-async function confirmDeleteSubject(id)
-{
+async function confirmDeleteSubject(id) {
     if (!confirm('¿Seguro que deseas borrar esta materia?')) return;
 
-    try
-    {
+    try {
         await subjectsAPI.remove(id);
-        loadSubjects();
-    }
-    catch (err)
-    {
-        console.error('Error al borrar materia:', err.message);
+        loadSubjects(); // recarga la tabla
+    } catch (err) {
+        document.getElementById('errorModal').style.display = 'block';
+       
     }
 }
