@@ -11,7 +11,7 @@
 export function createAPI(moduleName, config = {}) 
 {
     const API_URL = config.urlOverride ?? `../../backend/server.php?module=${moduleName}`;
-
+    //VALIDA EMAIL: cambio en funcion sendJSON para los mensajes de error
     async function sendJSON(method, data) 
     {
         const res = await fetch(API_URL,
@@ -20,10 +20,24 @@ export function createAPI(moduleName, config = {})
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         });
+        
+        console.log(res);
+        
+        //convierte la respuesta a objeto js
+        const responseData = await res.json();
 
-        if (!res.ok) throw new Error(`Error en ${method}`);
-        return await res.json();
+        console.log(responseData);
+        
+        if (!res.ok) 
+        {
+            // Si el backend envió un mensaje de error, lo usa. Si no, usa uno genérico.
+            const errorMessage = responseData.error || `Error ${res.status} en ${method}`;
+            throw new Error(errorMessage);
+        }
+
+        return responseData; // Devuelve el contenido si no hubo errores
     }
+    
 
     return {
         async fetchAll()

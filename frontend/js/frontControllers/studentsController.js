@@ -47,7 +47,11 @@ function setupFormHandler()
         }
         catch (err)
         {
+            
             console.error(err.message);
+            //VALIDA EMAIL: manda el mensaje de error al html
+            document.getElementById('errorMessage').textContent = err.message;
+            document.getElementById('errorModal').style.display = 'block';
         }
     });
 }
