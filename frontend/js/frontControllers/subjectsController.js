@@ -54,6 +54,10 @@ function setupSubjectFormHandler()
         {
             alert(err.message);
             console.error(err.message);
+            document.getElementById('errorMessage').textContent = err.message;
+            document.getElementById('errorModal').style.display = 'block';
+            
+
         }
   });
 }
