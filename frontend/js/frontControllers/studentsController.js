@@ -47,8 +47,11 @@ function setupFormHandler()
         }
         catch (err)
         {
-            alert(err.message); //VALIDA EMAIL: se pone solo alert porque err ya contiene el mensaje de error debido a mi funcion sendJSON en apifactory.js
+            
             console.error(err.message);
+            //VALIDA EMAIL: manda el mensaje de error al html
+            document.getElementById('errorMessage').textContent = err.message;
+            document.getElementById('errorModal').style.display = 'block';
         }
     });
 }
