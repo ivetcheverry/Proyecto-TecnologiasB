@@ -179,6 +179,8 @@ function fillForm(student)
     document.getElementById('age').value = student.age;
 }
   
+// ... (código existente hasta la función confirmDelete)
+
 async function confirmDelete(id) 
 {
     if (!confirm('¿Estás seguro que deseas borrar este estudiante?')) return;
@@ -191,6 +193,24 @@ async function confirmDelete(id)
     catch (err) 
     {
         console.error('Error al borrar:', err.message);
+        
+        // Lógica de validación de error más detallada (Frontend)
+        let errorMessage = 'No se pudo eliminar el estudiante.';
+        
+        // Si el error es una instancia de Error, intenta parsear el mensaje de la API
+        if (err.message.includes('Error en DELETE')) {
+            try {
+                errorMessage = 'El estudiante tiene asignaciones a materias y no puede ser eliminado.';
+
+            } catch(e) {
+                // Si falla al parsear el error de la API, usa el mensaje genérico
+                errorMessage = 'Error en la conexión o respuesta de la API.';
+            }
+        }
+
+        // Mostrar el modal con el mensaje de error
+        document.getElementById('errorMessage').textContent = errorMessage;
+        document.getElementById('errorModal').style.display = 'block';
     }
 }
   
