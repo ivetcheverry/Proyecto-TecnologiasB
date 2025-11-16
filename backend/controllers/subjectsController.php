@@ -43,23 +43,26 @@ function handleGet($conn)
 function handlePost($conn) 
 {
     $input = json_decode(file_get_contents("php://input"), true);
-    if (!getSubjectByName($conn,$name)){
-        $result = createSubject($conn, $input['name']);
-        if ($result['inserted'] > 0)    //0 si no insertó
-        {
-             echo json_encode(["message" => "Materia creada correctamente"]);
-        } 
-        else 
-          if (isset($result['error'])){
-            http_response_code(409);
-            echo json_encode(["error"=>$result=>["error"]]);
-        }
-       
-    }
-    else{
-        http_response_code(422);
+    if (getSubjectByName($conn,$input['name']))
+    {
+        http_response_code(409);  //error en solicitud
         echo json_encode(["error" => "No se pudo crear, ya existe la materia"]);
+        return;
     }
+    $result = createSubject($conn, $input['name']); //me volviste loco
+    if ($result['inserted'] > 0)    //0 si no insertó
+    {
+             echo json_encode(["message" => "Materia creada correctamente"]);
+    } 
+    else 
+    {
+          //if (isset($result['error'])){
+        http_response_code(500);
+        echo json_encode(["error" => "No se agregó"]);
+    }
+       
+   
+    
          
 }
 

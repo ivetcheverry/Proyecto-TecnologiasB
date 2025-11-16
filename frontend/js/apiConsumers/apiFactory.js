@@ -21,14 +21,19 @@ export function createAPI(moduleName, config = {})
             body: JSON.stringify(data)
         });
 
+             console.log(res);
+        
+        //convierte la respuesta a objeto js
         const responseData = await res.json();
-        //modificacion
+
+        console.log(responseData);
+        
         if (!res.ok) 
         {
-            const errorMessage = responseData.error || `Error ${res.status} en ${method} `;
-             throw new Error(errorMessage);
+            // Si el backend envió un mensaje de error, lo usa. Si no, usa uno genérico.
+            const errorMessage = responseData.error || `Error ${res.status} en ${method}`;
+            throw new Error(errorMessage);
         }
-           
         return responseData;
     }
 
