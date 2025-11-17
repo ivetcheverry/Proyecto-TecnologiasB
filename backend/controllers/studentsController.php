@@ -46,6 +46,13 @@ function handlePost($conn)
 {
     $input = json_decode(file_get_contents("php://input"), true);
 
+    //VALIDA EMAIL: verifica si existe o no el email
+    if (getStudentByEmail($conn, $input['email'])){
+        http_response_code(409); //este error significa que una solicitud no pudo completarse
+        echo json_encode(["error" => "El correo electrónico ya existe"]);
+        return;
+    }
+
     $result = createStudent($conn, $input['fullname'], $input['email'], $input['age']);
     if ($result['inserted'] > 0) 
     {
@@ -77,8 +84,17 @@ function handlePut($conn)
 function handleDelete($conn) 
 {
     $input = json_decode(file_get_contents("php://input"), true);
+    $studentId = $input['id'];
 
-    $result = deleteStudent($conn, $input['id']);
+    // Validar en el backend si el estudiante está asignado (antes de intentar borrar)
+    if (isStudentAssigned($conn, $studentId)) 
+    {
+        http_response_code(409); // 409 Conflict (A student is assigned to subjects)
+        echo json_encode(["error" => "El estudiante está asignado a materias y no puede ser eliminado."]);
+        return;
+    }
+
+    $result = deleteStudent($conn, $studentId);
     if ($result['deleted'] > 0) 
     {
         echo json_encode(["message" => "Eliminado correctamente"]);

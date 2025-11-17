@@ -35,6 +35,15 @@ function getTotalStudents($conn)
     return $result->fetch_assoc()['total'];
 }
 
+function isStudentAssigned($conn, $id) 
+{
+    $stmt = $conn->prepare("SELECT COUNT(*) AS count FROM students_subjects WHERE student_id = ?");
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    return $result->fetch_assoc()['count'] > 0;
+}
+
 function getStudentById($conn, $id) 
 {
     $stmt = $conn->prepare("SELECT * FROM students WHERE id = ?");
@@ -46,8 +55,20 @@ function getStudentById($conn, $id)
     return $result->fetch_assoc(); 
 }
 
+// VALIDA EMAIL: funcion que busca el email, y devuelve los datos si exite o NULL si no
+function getStudentByEmail($conn, $email)
+{
+    $stmt = $conn->prepare("SELECT * FROM students WHERE email = ?");
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    return $result->fetch_assoc(); // Devuelve el registro si existe, o null si no
+}
+
+
 function createStudent($conn, $fullname, $email, $age) 
 {
+    
     $sql = "INSERT INTO students (fullname, email, age) VALUES (?, ?, ?)";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("ssi", $fullname, $email, $age);
@@ -75,6 +96,7 @@ function updateStudent($conn, $id, $fullname, $email, $age)
 
 function deleteStudent($conn, $id) 
 {
+    // Lógica para el borrado
     $sql = "DELETE FROM students WHERE id = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $id);
