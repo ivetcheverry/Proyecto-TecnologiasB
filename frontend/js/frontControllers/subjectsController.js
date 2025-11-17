@@ -170,7 +170,10 @@ async function confirmDeleteSubject(id) {
         await subjectsAPI.remove(id);
         loadSubjects(); // recarga la tabla
     } catch (err) {
+                // Cambiar el mensaje específico antes de mostrar el modal
+        document.getElementById('errorMessage').textContent = 
+            "No se puede eliminar la materia porque está asignada a uno o más estudiantes.";
         document.getElementById('errorModal').style.display = 'block';
-       
+        
     }
 }
