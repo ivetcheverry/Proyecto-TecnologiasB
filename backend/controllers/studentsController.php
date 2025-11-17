@@ -46,6 +46,13 @@ function handlePost($conn)
 {
     $input = json_decode(file_get_contents("php://input"), true);
 
+    //VALIDA EMAIL: verifica si existe o no el email
+    if (getStudentByEmail($conn, $input['email'])){
+        http_response_code(409); //este error significa que una solicitud no pudo completarse
+        echo json_encode(["error" => "El correo electrónico ya existe"]);
+        return;
+    }
+
     $result = createStudent($conn, $input['fullname'], $input['email'], $input['age']);
     if ($result['inserted'] > 0) 
     {
