@@ -42,19 +42,31 @@ function getSubjectById($conn, $id)
 
     return $result->fetch_assoc(); 
 }
-
-function createSubject($conn, $name) 
-{
-    $sql = "INSERT INTO subjects (name) VALUES (?)";
+function getSubjectByName($conn,$name){
+   
+    $sql = "SELECT  * FROM subjects WHERE name  = ?";  // ? para evitar injection , luego se remplaza por $name
+    
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("s", $name);
     $stmt->execute();
+    $result = $stmt->get_result();
 
-    return 
-    [
+    return $result->fetch_assoc();
+}
+function createSubject($conn, $name) 
+{
+
+        $sql = "INSERT INTO subjects (name) VALUES (?)";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("s", $name);
+        $stmt->execute();
+
+        return 
+        [
         'inserted' => $stmt->affected_rows,        
         'id' => $conn->insert_id
-    ];
+         ];
+
 }
 
 function updateSubject($conn, $id, $name) 
