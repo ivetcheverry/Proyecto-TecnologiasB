@@ -22,3 +22,10 @@ This project is an educational prototype of a CRUD (Create Read Update and Delet
 
 ## Special thanks to
 As long as it doesn't dirty the chair =] (Mandarina)
+
+## Group Number: 09
+## Authors:
+- ETCHEGARAY, MANUELA
+- ETCHEVERRY, IVAN ESTEBAN
+- MARTINEZ CALVI, LUCAS
+- SALANOUVE, LUCIO
